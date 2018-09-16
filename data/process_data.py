@@ -11,6 +11,14 @@ import pandas as pd
 import sqlalchemy
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Load data from the csv files and merges them in a DataFrame
+    Args:
+        messages_filepath: path of the messages csv file
+        categories_filepath: path of the categories csv file
+    Returns:
+        (DataFrame) df: Merged DataFrame of messages and categories
+    """
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
     # load categories dataset
@@ -23,6 +31,13 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def _get_processed_categories(df):
+    """
+    Return the dataframe categories
+    Args:
+        df: Merged  DataFrame
+    Returns:
+        categories: list of categories
+    """
     # create a dataframe of the 36 individual category columns
     categories = df['categories'].str.split(';', expand=True)
 
@@ -46,6 +61,14 @@ def _get_processed_categories(df):
 
 
 def clean_data(df):
+    """
+    Clean the merged dataset
+    Args:
+        df: Merged  DataFrame
+    Returns:
+        (DataFrame) df: Cleaned dataframe without duplicates
+    """
+
     # process categories
     categories = _get_processed_categories(df)
     # drop the original categories column from `df`
@@ -64,6 +87,12 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """
+    Save clean dataset into an sqlite database
+    Args:
+        df:  Cleaned dataframe
+        database_filename: Name of the database file
+    """
     engine = sqlalchemy.create_engine('sqlite:///'+database_filename)
     df.to_sql('categorized_messages', engine, index=False)
 

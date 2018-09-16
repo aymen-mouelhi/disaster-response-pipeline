@@ -1,24 +1,108 @@
 import sys
-
+import sqlalchemy
+import pandas as pd
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+from sklearn import grid_search
+import nltk
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+import string
+nltk.download('stopwords')
+nltk.download('punkt')
 
 def load_data(database_filepath):
-    pass
+    """
+    Load data from database into X and Y
+    Args:
+        database_filepath: path to database
+    Returns:
+        (DataFrame) X: feature (message)
+        (DataFrame) Y: labels
+    """
+
+    # load data from database
+    engine = sqlalchemy.create_engine('sqlite:///'+database_filepath)
+    df = pd.read_sql_table('categorized_messages', engine)
+
+    # Create X and Y
+    X = df['message']
+    Y = df.drop(['id','message','original','genre'], axis=1)
+    category_names = list(Y)
+
+    return X, Y, category_names
 
 
 def tokenize(text):
-    pass
+    """
+    Tokenize text
+    Args:
+        text: Text to be tokenized
+    Returns:
+        (str[]): array of tokens
+    """
+    tokens = []
+    stop = stopwords.words('english') + list(string.punctuation)
+
+    for i in word_tokenize(text.lower()):
+        if i not in stop:
+            tokens.append(i)
+
+    return tokens
 
 
 def build_model():
-    pass
+    """
+    Build MultiClassification Model
+    Returns:
+        (GridSearchCV) cv: GridSearchCV object
+    """
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+
+    parameters = {
+        'vect__ngram_range': ((1, 1), (1, 2)),
+        'clf__estimator__min_samples_split': [2, 4],
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters, verbose=2, n_jobs=-1)
+
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    """
+    Evaluate Model perfomance
+    Args:
+        model: Classification model
+        X_test: Test Set features
+        Y_test: Test Set labels
+        category_names: list of category names
+    Returns:
+        (str[]): array of tokens
+    """
+
+    Y_pred = model.predict(X_test)
+
+    # Show results
+    print(classification_report(Y_pred, Y_test.values, target_names=category_names))
 
 
 def save_model(model, model_filepath):
-    pass
+    """
+    Save the model to a pickle file
+    Args:
+        model: Classification model
+        model_filepath: Pickle file path
+    """
+
+    pickle.dump(model, open(model_filepath, "wb"))
 
 
 def main():
@@ -27,13 +111,13 @@ def main():
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
+
         print('Building model...')
         model = build_model()
-        
+
         print('Training model...')
         model.fit(X_train, Y_train)
-        
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
