@@ -3,9 +3,11 @@ import sqlalchemy
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
 from sklearn import grid_search
 import nltk
 from nltk import word_tokenize
@@ -13,6 +15,7 @@ from nltk.corpus import stopwords
 import string
 nltk.download('stopwords')
 nltk.download('punkt')
+import pickle
 
 def load_data(database_filepath):
     """
@@ -29,8 +32,8 @@ def load_data(database_filepath):
     df = pd.read_sql_table('categorized_messages', engine)
 
     # Create X and Y
-    X = df['message']
-    Y = df.drop(['id','message','original','genre'], axis=1)
+    X = df['message'].values
+    Y = df.drop(['id','message','original','genre'], axis=1).values
     category_names = list(Y)
 
     return X, Y, category_names
