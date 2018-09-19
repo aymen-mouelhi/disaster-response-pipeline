@@ -94,7 +94,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
     Y_pred = model.predict(X_test)
 
     # Show results
-    print(classification_report(Y_pred, Y_test.values, target_names=category_names))
+    print(classification_report(Y_pred, Y_test, target_names=category_names))
 
 
 def save_model(model, model_filepath):
