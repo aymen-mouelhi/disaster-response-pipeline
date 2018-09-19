@@ -2,7 +2,7 @@ import sys
 import sqlalchemy
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
@@ -66,12 +66,12 @@ def build_model():
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
-        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+        ('clf', MultiOutputClassifier(AdaBoostClassifier()))
     ])
 
     parameters = {
         'vect__ngram_range': ((1, 1), (1, 2)),
-        'clf__estimator__min_samples_split': [2, 4],
+        'clf__estimator__learning_rate': [0.001, 0.01, 0.1, 1],
     }
 
     cv = GridSearchCV(pipeline, param_grid=parameters, verbose=2, n_jobs=-1)
