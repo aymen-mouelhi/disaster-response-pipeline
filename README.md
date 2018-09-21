@@ -12,6 +12,10 @@ This pipeline handles the training of a Multi-class machine learning model and s
 
 #### Flask Web Application
 Basically, the web application uses the trained model to classify the entered messages.
+Application Graphs:
+- Distribution of Message Genres
+- Distribution of Categories
+- Most Frequent Words
 
 ### Instructions
 1. Run the following commands in the project's root directory to set up your database and model.
