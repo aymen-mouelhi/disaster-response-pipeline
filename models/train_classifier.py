@@ -96,6 +96,10 @@ def evaluate_model(model, X_test, Y_test, category_names):
     # Show results
     print(classification_report(Y_pred, Y_test, target_names=category_names))
 
+    print("**** Accuracy scores for each category *****\n")
+    for i in range(36):
+        print("Accuracy score for " + Y_test.columns[i], accuracy_score(Y_test.values[:,i],y_preds[:,i]))
+
 
 def save_model(model, model_filepath):
     """
