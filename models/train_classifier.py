@@ -28,13 +28,13 @@ def load_data(database_filepath):
     """
 
     # load data from database
-    engine = sqlalchemy.create_engine('sqlite:///'+database_filepath)
+    engine = sqlalchemy.create_engine("sqlite:///"+database_filepath)
     df = pd.read_sql_table('categorized_messages', engine)
 
     # Create X and Y
     X = df['message'].values
     Y = df.drop(['id','message','original','genre'], axis=1).values
-    category_names = list(Y)
+    category_names = (df.iloc[:,4:].columns).tolist()
 
     return X, Y, category_names
 
@@ -128,7 +128,6 @@ def main():
         save_model(model, model_filepath)
 
         print('Trained model saved!')
-
     else:
         print('Please provide the filepath of the disaster messages database '\
               'as the first argument and the filepath of the pickle file to '\
