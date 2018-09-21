@@ -6,6 +6,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 from sklearn import grid_search
@@ -16,6 +17,7 @@ import string
 nltk.download('stopwords')
 nltk.download('punkt')
 import pickle
+
 
 def load_data(database_filepath):
     """
@@ -98,7 +100,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
     print("**** Accuracy scores for each category *****\n")
     for i in range(36):
-        print("Accuracy score for " + Y_test.columns[i], accuracy_score(Y_test.values[:,i],y_preds[:,i]))
+        print("Accuracy score for " + category_names[i], accuracy_score(Y_test[:,i],Y_pred[:,i]))
 
 
 def save_model(model, model_filepath):
