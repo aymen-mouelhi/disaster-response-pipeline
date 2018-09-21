@@ -13,6 +13,7 @@ from sklearn import grid_search
 import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 import string
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -49,14 +50,15 @@ def tokenize(text):
     Returns:
         (str[]): array of tokens
     """
-    tokens = []
-    stop = stopwords.words('english') + list(string.punctuation)
+    tokens = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
 
-    for i in word_tokenize(text.lower()):
-        if i not in stop:
-            tokens.append(i)
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
 
-    return tokens
+    return clean_tokens
 
 
 def build_model():
