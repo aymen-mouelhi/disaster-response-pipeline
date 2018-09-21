@@ -8,6 +8,7 @@ ETL Pipeline that consists of three major parts:
 
 import sys
 import pandas as pd
+import numpy as np
 import sqlalchemy
 
 def load_data(messages_filepath, categories_filepath):
@@ -39,36 +40,30 @@ def _get_processed_categories(df):
         categories: list of categories
     """
     # create a dataframe of the 36 individual category columns
-    categories = df['categories'].str.split(';', expand=True)
+    categories = df['categories'].str.split(pat=';', n=-1, expand=True)
 
     # select the first row of the categories dataframe
     row = categories.iloc[0]
+
     # use this row to extract a list of new column names for categories.
     # one way is to apply a lambda function that takes everything
     # up to the second to last character of each string with slicing
-    category_colnames = row.apply(lambda x: x.split('-')[0])
+    category_colnames = row.apply(lambda x: x[:-2])
+
     # rename the columns of `categories`
     categories.columns = category_colnames
 
     for column in categories:
         # set each value to be the last character of the string
-        categories[column] = categories[column].apply(lambda x: x.split('-')[1])
+        categories[column] = categories[column].apply(lambda x: x[-1:])
 
         # convert column from string to numeric
-        categories[column] = categories[column].astype(int)
+        categories[column] = categories[column].astype(np.int).apply(lambda x: 1 if x>=2 else x)
 
     return categories
 
 
 def clean_data(df):
-    """
-    Clean the merged dataset
-    Args:
-        df: Merged  DataFrame
-    Returns:
-        (DataFrame) df: Cleaned dataframe without duplicates
-    """
-
     # process categories
     categories = _get_processed_categories(df)
     # drop the original categories column from `df`
@@ -76,15 +71,14 @@ def clean_data(df):
     # concatenate the original dataframe with the new `categories` dataframe
     df = pd.concat([df, categories], axis=1)
 
-
     # check number of duplicates
     duplicated = df.duplicated()
     duplicated_count = len(duplicated[duplicated == True])
+
     # drop duplicates
-    df.drop_duplicates(inplace=True)
+    df.drop_duplicates(inplace=True, keep='first')
 
     return df
-
 
 def save_data(df, database_filename):
     """
